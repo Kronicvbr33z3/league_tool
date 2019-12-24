@@ -6,14 +6,18 @@ pub mod get_from_api {
     pub struct Profile {
         pub summoner: Summoner,
         pub rank: Vec<Rank>,
+        pub match_history: MatchHistory,
     }
     impl Profile {
         pub fn new_from_name(name: String, api_key: &String) -> Result<Profile, Error> {
             let summoner = Summoner::summoner_from_name(name, &api_key)?;
             let rank = Rank::from_name(&api_key, &summoner.id)?;
+            let match_history = MatchHistory::new(&summoner, &api_key)?;
             Ok(Profile {
                 summoner: summoner,
                 rank: rank,
+                match_history: match_history,
+
             })
         }
     }
@@ -52,15 +56,21 @@ pub mod get_from_api {
     }
     #[derive(Serialize, Deserialize, Debug)]
     pub struct MatchHistory {
-        matches: Vec<Match>,
+        pub matches: Vec<Match>,
+        #[serde(alias="totalGames")]
+        total_games: i32,
+        #[serde(alias="startIndex")]
+        start_index: i32,
+        #[serde(alias="endIndex")]
+        end_index: i32,
 
     }
     #[derive(Serialize, Deserialize, Debug)]
-    struct Match{
-        lane: String,
+    pub struct Match{
+        pub lane: String,
         #[serde(alias="gameId")]
         game_id: i64,
-        champion: i32,
+        pub champion: i32,
         #[serde(alias="platformId")]
         platform_id: String,
         season: i32,
@@ -88,6 +98,17 @@ pub mod get_from_api {
             let mut response = reqwest::get(&request_url)?;
             let summoner: Summoner = response.json()?;
             Ok(summoner)
+        }
+    }
+    impl MatchHistory {
+        pub fn new(summoner: &Summoner, api_key: &String) -> Result<MatchHistory, Error> {
+            let request_url = format!("https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/{account_id}?endIndex=5&api_key={api_key}", 
+            account_id = summoner.account_id,
+            api_key = api_key);
+
+            let mut response = reqwest::get(&request_url)?;
+            let match_history: MatchHistory = response.json()?;
+            Ok(match_history)
         }
     }
 }
