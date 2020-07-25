@@ -21,7 +21,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     match Cli::from_args() {
         Cli::Summoner { name } => {
             let profile = riot_api::get_from_api::Profile::new_from_name(name, &api_key).await?;
-            nice_print::print::print_summoner(profile);
+            //nice_print::print::print_summoner(profile);
+            println!("{:?}", profile.match_history.matches[0].match_info.profile_participant_id);
         }
         _ => println!("Unsupported Command"),
     }

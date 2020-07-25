@@ -4,7 +4,6 @@ pub mod get_from_api {
     extern crate reqwest;
     use reqwest::Error;
     use serde::{Deserialize, Serialize};
-    use std::error::Error as stderror;
 
     pub struct Profile {
         pub summoner: Summoner,
@@ -15,7 +14,12 @@ pub mod get_from_api {
         pub async fn new_from_name(name: String, api_key: &String) -> Result<Profile, Error> {
             let summoner = Summoner::summoner_from_name(name, &api_key).await?;
             let rank = Rank::from_name(&api_key, &summoner.id).await?;
-            let match_history = MatchHistory::new(&summoner, &api_key).await?;
+            let mut match_history = MatchHistory::new(&summoner, &api_key).await?;
+
+            for current_match in match_history.matches.iter_mut() {
+                
+               println!("{:?}", current_match.match_info.profile_participant_id = current_match.match_info.get_participant_id(&summoner.account_id).unwrap() );
+            }
 
             Ok(Profile {
                 summoner: summoner,
@@ -133,16 +137,21 @@ pub mod get_from_api {
         queue_id: i32,
         participant_identities: Vec<ParticipantIdentity>,
         participants: Vec<Participant>,
+        #[serde(skip)]
+        pub profile_participant_id: i32,
         
     }
    impl MatchInfo {
        fn get_participant_id(&self, account_id: &String) -> Result<i32, Error> {
         let mut pid: i32 = 0;
            for participant in self.participant_identities.iter() {
-               if &participant.player.account_id == account_id {
-                   pid = participant.participant_id;
-               } else {
-                   pid = -1;
+               match &participant.player.account_id == account_id{
+                   true => {
+                       println!("{}", participant.player.account_id);
+                       println!("{}", account_id);
+                       //println!("{}", participant.participant_id);
+                       pid = participant.participant_id },
+                   _ => pid = -1,
                }
            }
            Ok(pid)
