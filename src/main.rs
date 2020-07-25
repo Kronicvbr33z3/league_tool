@@ -3,12 +3,7 @@ mod riot_api;
 use std::error::Error;
 use structopt::StructOpt;
 
-use async_timer::{Timed};
-use async_timer::oneshot::{Oneshot, Timer};
-
-use std::time;
-
-
+//List of Commands
 #[derive(StructOpt)]
 enum Cli {
     //Champion Summoner Tier List
@@ -18,14 +13,14 @@ enum Cli {
         //champion: String,
     },
 }
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let api_key: String = "RGAPI-c9b07ca2-4b22-41af-a04c-fab683382356".to_string();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    //API key Required for Riot API
+    let api_key: String = "RGAPI-88da60fc-f70c-446c-9bde-9217be3db585".to_string();
 
     match Cli::from_args() {
         Cli::Summoner { name } => {
-            let profile = riot_api::get_from_api::Profile::new_from_name(name, &api_key)?;
-
+            let profile = riot_api::get_from_api::Profile::new_from_name(name, &api_key).await?;
             nice_print::print::print_summoner(profile);
         }
         _ => println!("Unsupported Command"),

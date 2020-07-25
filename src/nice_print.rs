@@ -1,12 +1,12 @@
 pub mod print {
     use crate::riot_api::get_from_api::Profile;
     pub fn print_summoner(profile: Profile) {
-        println!("/////////////////////////////////");
+        println!("**********************************");
         println!("Summoner Name: {}", profile.summoner.name);
         println!("Level: {}", profile.summoner.summoner_level);
         print_rank(&profile);
         print_match_history(&profile);
-        println!("/////////////////////////////////")
+        println!("**********************************")
     }
     fn print_rank(profile: &Profile) {
         for rank in profile.rank.iter() {
